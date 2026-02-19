@@ -1,0 +1,22 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: meetbot_db
+    restart: unless-stopped
+    ports:
+      - "${POSTGRES_PORT:-54323}:5432"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-meetbot}
+      POSTGRES_USER: ${POSTGRES_USER:-meetbot}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-meetbot}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-meetbot} -d ${POSTGRES_DB:-meetbot}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:
+    driver: local
