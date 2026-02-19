@@ -1,33 +1,43 @@
 import { NextRequest, NextResponse } from "next/server";
 
 /**
- * Protects authenticated routes (/welcome, /dashboard).
- * If the access_token cookie is missing, redirect to /login.
+ * Protects authenticated routes.
+ * - /welcome, /dashboard → redirect to /login if no access_token
+ * - /admin/dashboard     → redirect to /admin if no access_token
  */
 
-const PROTECTED_PATHS = ["/welcome", "/dashboard"];
+const USER_PROTECTED = ["/welcome", "/dashboard"];
+const ADMIN_PROTECTED = ["/admin/dashboard"];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const accessToken = request.cookies.get("access_token")?.value;
 
-  const isProtected = PROTECTED_PATHS.some(
+  // Admin-protected routes → redirect to /admin (admin login)
+  const isAdminProtected = ADMIN_PROTECTED.some(
     (p) => pathname === p || pathname.startsWith(`${p}/`),
   );
 
-  if (!isProtected) {
-    return NextResponse.next();
+  if (isAdminProtected && !accessToken) {
+    return NextResponse.redirect(new URL("/admin", request.url));
   }
 
-  const accessToken = request.cookies.get("access_token")?.value;
+  // User-protected routes → redirect to /login
+  const isUserProtected = USER_PROTECTED.some(
+    (p) => pathname === p || pathname.startsWith(`${p}/`),
+  );
 
-  if (!accessToken) {
-    const loginUrl = new URL("/login", request.url);
-    return NextResponse.redirect(loginUrl);
+  if (isUserProtected && !accessToken) {
+    return NextResponse.redirect(new URL("/login", request.url));
   }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/welcome/:path*", "/dashboard/:path*"],
+  matcher: [
+    "/welcome/:path*",
+    "/dashboard/:path*",
+    "/admin/dashboard/:path*",
+  ],
 };

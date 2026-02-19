@@ -22,6 +22,14 @@ export class ApiError extends Error {
       typeof data.non_field_errors[0] === "string"
     ) {
       message = data.non_field_errors[0];
+    } else {
+      // Try to extract the first field-level error
+      const firstField = Object.values(data).find(
+        (v) => Array.isArray(v) && typeof v[0] === "string",
+      ) as string[] | undefined;
+      if (firstField) {
+        message = firstField[0];
+      }
     }
 
     super(message);
@@ -64,6 +72,11 @@ export interface LoginPayload {
   code: string;
 }
 
+export interface AdminLoginPayload {
+  username: string;
+  password: string;
+}
+
 export interface User {
   id: number;
   username: string;
@@ -72,17 +85,52 @@ export interface User {
   last_name: string;
 }
 
+export interface CreateUserPayload {
+  email: string;
+  starts_at: string;
+  expires_at: string;
+}
+
+export interface CreateUserResponse {
+  detail: string;
+  user: {
+    id: number;
+    email: string;
+    username: string;
+  };
+  session: {
+    code: string;
+    starts_at: string;
+    expires_at: string;
+  };
+  email_sent: boolean;
+}
+
 export const api = {
   auth: {
     login: (payload: LoginPayload) =>
-      request("/api/auth/login/", {
+      request("/api/auth/login", {
         method: "POST",
         body: JSON.stringify(payload),
       }),
 
     logout: () =>
-      request("/api/auth/logout/", { method: "POST" }),
+      request("/api/auth/logout", { method: "POST" }),
 
-    me: () => request<User>("/api/auth/me/"),
+    me: () => request<User>("/api/auth/me"),
+  },
+
+  admin: {
+    login: (payload: AdminLoginPayload) =>
+      request("/api/auth/admin/login", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      }),
+
+    createUser: (payload: CreateUserPayload) =>
+      request<CreateUserResponse>("/api/admin/users", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      }),
   },
 };

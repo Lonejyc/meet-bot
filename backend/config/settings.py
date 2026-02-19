@@ -184,3 +184,12 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 CORS_ALLOW_CREDENTIALS = True
+
+
+# Email (Resend)
+# https://resend.com/docs/send-with-python
+
+RESEND_API_KEY = os.getenv("RESEND_API_KEY", "")
+
+# Frontend URL used in invitation emails
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")

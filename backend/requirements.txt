@@ -7,4 +7,5 @@ psycopg==3.3.3
 psycopg-binary==3.3.3
 PyJWT==2.11.0
 python-dotenv==1.2.1
+resend==2.22.0
 sqlparse==0.5.5

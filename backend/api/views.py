@@ -1,14 +1,23 @@
+import logging
 from datetime import timedelta
 
 from django.conf import settings
+
+logger = logging.getLogger(__name__)
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 
-from .serializers import LoginSerializer, UserSerializer
+from .emails import send_invitation_email
+from .serializers import (
+    AdminLoginSerializer,
+    CreateUserSerializer,
+    LoginSerializer,
+    UserSerializer,
+)
 
 
 @api_view(["GET"])
@@ -56,7 +65,7 @@ def _clear_auth_cookies(response):
 
 
 # ---------------------------------------------------------------------------
-# Auth views
+# User auth views
 # ---------------------------------------------------------------------------
 
 @api_view(["POST"])
@@ -114,3 +123,84 @@ def me_view(request):
     """
     serializer = UserSerializer(request.user)
     return Response(serializer.data)
+
+
+# ---------------------------------------------------------------------------
+# Admin views
+# ---------------------------------------------------------------------------
+
+ADMIN_TOKEN_LIFETIME = timedelta(hours=24)
+
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def admin_login_view(request):
+    """
+    POST /api/auth/admin/login/
+    Body: { "username": "...", "password": "..." }
+    Authenticates a staff user and sets a 24h JWT cookie.
+    """
+    serializer = AdminLoginSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+
+    user = serializer.validated_data["user"]
+
+    token = AccessToken()
+    token["user_id"] = str(user.pk)
+    token["is_staff"] = True
+    token.set_exp(lifetime=ADMIN_TOKEN_LIFETIME)
+
+    response = Response(
+        {"detail": "Connexion admin réussie."},
+        status=status.HTTP_200_OK,
+    )
+    return _set_access_cookie(
+        response, token, int(ADMIN_TOKEN_LIFETIME.total_seconds())
+    )
+
+
+@api_view(["POST"])
+@permission_classes([IsAdminUser])
+def create_user_view(request):
+    """
+    POST /api/admin/users/
+    Body: { "email": "...", "starts_at": "...", "expires_at": "..." }
+    Creates a user + experience session and sends an invitation email.
+    """
+    serializer = CreateUserSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+
+    result = serializer.save()
+    user = result["user"]
+    session = result["session"]
+
+    # Send the invitation email
+    try:
+        send_invitation_email(
+            email=user.email,
+            code=session.code,
+            starts_at=session.starts_at,
+            expires_at=session.expires_at,
+        )
+        email_sent = True
+    except Exception as e:
+        logger.error("Failed to send invitation email to %s: %s", user.email, e, exc_info=True)
+        email_sent = False
+
+    return Response(
+        {
+            "detail": "Utilisateur créé avec succès.",
+            "user": {
+                "id": user.pk,
+                "email": user.email,
+                "username": user.username,
+            },
+            "session": {
+                "code": session.code,
+                "starts_at": session.starts_at.isoformat(),
+                "expires_at": session.expires_at.isoformat(),
+            },
+            "email_sent": email_sent,
+        },
+        status=status.HTTP_201_CREATED,
+    )
