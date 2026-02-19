@@ -12,12 +12,14 @@ interface ButtonAsButton extends ButtonBaseProps {
   href?: never;
   type?: "button" | "submit";
   onClick?: () => void;
+  disabled?: boolean;
 }
 
 interface ButtonAsLink extends ButtonBaseProps {
   href: string;
   type?: never;
   onClick?: never;
+  disabled?: never;
 }
 
 type ButtonProps = ButtonAsButton | ButtonAsLink;
@@ -36,6 +38,7 @@ export default function Button({
     "hover:scale-105 hover:shadow-lg",
     "active:scale-95 active:shadow-sm",
     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-primary",
+    "disabled:pointer-events-none disabled:opacity-50",
   ].join(" ");
 
   const variants: Record<ButtonVariant, string> = {
