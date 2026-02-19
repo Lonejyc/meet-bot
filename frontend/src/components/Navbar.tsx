@@ -1,7 +1,22 @@
+"use client";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Button from "./Button";
+import { api } from "@/lib/api";
 
 export default function Navbar() {
+  const router = useRouter();
+
+  async function handleLogout() {
+    try {
+      await api.auth.logout();
+    } catch {
+      // Ignore errors — clear cookies regardless
+    }
+    router.push("/login");
+  }
+
   return (
     <nav className="relative z-20 flex items-center gap-8">
       <Link
@@ -16,7 +31,11 @@ export default function Navbar() {
       >
         Aide
       </Link>
-      <Button href="/login" variant="outline" className="border-accent text-accent">
+      <Button
+        variant="outline"
+        className="border-accent text-accent"
+        onClick={handleLogout}
+      >
         Déconnexion
       </Button>
     </nav>

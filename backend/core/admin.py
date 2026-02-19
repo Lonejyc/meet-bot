@@ -4,6 +4,7 @@ from .models import (
     Device,
     DeviceGroup,
     DeviceGroupMembership,
+    ExperienceSession,
     Organization,
     UserGroup,
 )
@@ -40,3 +41,15 @@ class DeviceAdmin(admin.ModelAdmin):
 class DeviceGroupMembershipAdmin(admin.ModelAdmin):
     list_display = ("id", "device_group", "user", "user_group", "inherit_default_access")
     list_filter = ("inherit_default_access", "device_group")
+
+
+@admin.register(ExperienceSession)
+class ExperienceSessionAdmin(admin.ModelAdmin):
+    list_display = ("id", "user", "code", "starts_at", "expires_at", "is_active_display")
+    list_filter = ("starts_at", "expires_at")
+    search_fields = ("user__username", "user__email", "code")
+    readonly_fields = ("code", "created_at")
+
+    @admin.display(boolean=True, description="Active")
+    def is_active_display(self, obj):
+        return obj.is_active

@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 import os
+from datetime import timedelta
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -48,6 +49,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     # Third-party
     "rest_framework",
+    "rest_framework_simplejwt",
     "corsheaders",
     # Local
     "core",
@@ -66,6 +68,10 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = "config.urls"
+
+# Disable APPEND_SLASH — the API is called via Next.js rewrites which
+# may strip trailing slashes, and POST requests cannot be redirected.
+APPEND_SLASH = False
 
 TEMPLATES = [
     {
@@ -146,9 +152,27 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # https://www.django-rest-framework.org/api-guide/settings/
 
 REST_FRAMEWORK = {
-    "DEFAULT_PERMISSION_CLASSES": [
-        "rest_framework.permissions.AllowAny",
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "api.authentication.CookieJWTAuthentication",
     ],
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",
+    ],
+}
+
+
+# Simple JWT
+# https://django-rest-framework-simplejwt.readthedocs.io/
+
+SIMPLE_JWT = {
+    # Default lifetime used as a fallback; the login view overrides this
+    # with the remaining experience session duration.
+    "ACCESS_TOKEN_LIFETIME": timedelta(hours=4),
+    "AUTH_COOKIE_ACCESS": "access_token",
+    "AUTH_COOKIE_HTTP_ONLY": True,
+    "AUTH_COOKIE_SAMESITE": "Lax",
+    "AUTH_COOKIE_SECURE": not DEBUG,
+    "AUTH_COOKIE_PATH": "/",
 }
 
 
