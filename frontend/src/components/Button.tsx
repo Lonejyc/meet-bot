@@ -29,11 +29,20 @@ export default function Button({
   href,
   ...rest
 }: ButtonProps) {
-  const base =
-    "inline-flex items-center justify-center rounded-full px-6 py-2.5 font-sans font-bold text-sm transition-opacity hover:opacity-90 cursor-pointer";
+  const base = [
+    "inline-flex items-center justify-center rounded-full px-6 py-2.5",
+    "font-sans font-bold text-sm cursor-pointer select-none",
+    "transition-all duration-200 ease-out",
+    "hover:scale-105 hover:shadow-lg",
+    "active:scale-95 active:shadow-sm",
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-primary",
+  ].join(" ");
+
   const variants: Record<ButtonVariant, string> = {
-    filled: "bg-accent text-primary",
-    outline: "border-2 border-accent text-accent bg-transparent",
+    filled:
+      "bg-accent text-primary hover:brightness-110 active:brightness-95",
+    outline:
+      "border-2 border-accent text-accent bg-transparent hover:bg-accent/10 active:bg-accent/20",
   };
 
   const classes = `${base} ${variants[variant]} ${className}`;
