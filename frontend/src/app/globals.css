@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+* {
+  outline: 1px solid red;
+}
+
 @theme inline {
   /* Couleurs */
   --color-primary: #5D31FF;
