@@ -7,8 +7,8 @@ export default function DashboardPage() {
   const [sliderValue, setSliderValue] = useState(55);
 
   return (
-    <section className="flex h-screen w-full flex-col overflow-hidden p-4 gap-4">
-      <div className="relative w-full h-[calc(100vh-220px)] overflow-hidden rounded-xl bg-gray-400">
+    <section className="flex h-full w-full flex-col overflow-hidden p-4 gap-4">
+      <div className="relative flex-1 min-h-0 w-full overflow-hidden rounded-xl bg-gray-400">
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-1">
           <Camera className="h-10 w-10 text-white/50" />
           <span className="text-xs font-medium text-white/50">Écran Principal</span>
@@ -86,7 +86,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <div className="absolute right-4 bottom-4 aspect-video w-64 overflow-hidden rounded-lg bg-gray-400">
+      <div className="absolute right-4 bottom-4 aspect-video w-84 overflow-hidden rounded-lg bg-gray-400">
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-1">
           <Camera className="h-5 w-5 text-white/60" />
           <span className="text-[10px] font-medium text-white/60">Retour Écran</span>

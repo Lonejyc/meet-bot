@@ -8,7 +8,7 @@ export default function AuthenticatedLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="relative flex min-h-screen flex-col bg-primary">
+    <div className="relative flex h-screen flex-col overflow-hidden bg-primary">
       {/* Header — logo + navbar */}
       <header className="relative z-20 flex items-center justify-between p-6">
         <Logo className="h-16 w-auto text-white" />
@@ -19,7 +19,7 @@ export default function AuthenticatedLayout({
       <Ribbon />
 
       {/* Centered content */}
-      <main className="relative z-10 flex flex-1 items-center justify-center px-4 pb-12">
+      <main className="relative z-10 flex h-0 flex-1 items-center justify-center overflow-hidden px-4">
         {children}
       </main>
     </div>
